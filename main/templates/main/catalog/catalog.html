@@ -1,0 +1,11 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+    Страница каталога
+{% endblock %}
+
+{% block content %}
+    {% for item in product %}
+        <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>
+    {% endfor %}
+{% endblock %}
