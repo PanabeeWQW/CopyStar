@@ -9,9 +9,13 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('category', kwargs={'cat_id': self.pk})
+
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+
 
 class Product(models.Model):
     photo = models.ImageField(upload_to="product_photos")
@@ -27,9 +31,11 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse('product', kwargs={'product_id': self.pk})
+
     class Meta:
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
+
 
 class Order(models.Model):
     STATUS_CHOICES = (
@@ -38,6 +44,7 @@ class Order(models.Model):
         ('Closed', 'Закрытый')
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Чей заказ')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New', verbose_name='Статус заказа')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания заказа')
     cancellation_reason = models.TextField(blank=True, null=True, verbose_name='Причина закрытия заказа')
@@ -46,10 +53,23 @@ class Order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
 
+    def __str__(self):
+        return f'{self.user} - {self.product.name}'
+
+    def get_absolute_url(self):
+        return reverse('order')
+
+
 class Cart(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.product.name} {self.client.username}'
+
+    def get_absolute_url(self):
+        return reverse('cart')
 
     class Meta:
         verbose_name = 'Корзина'

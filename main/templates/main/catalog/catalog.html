@@ -5,7 +5,33 @@
 {% endblock %}
 
 {% block content %}
-    {% for item in product %}
-        <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>
-    {% endfor %}
+    <h1>Каталог</h1>
+    <h3>Сортировка по категориям</h3>
+    <ul class="product_cat">
+        <li><a href="{% url 'catalog' %}">Показать все товары</a></li>
+        {% for cat in categories %}
+            <li><a href="{% url 'category' cat_id=cat.pk %}">{{ cat.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <h3>Сортировать товары по</h3>
+    <ul class="sort_by">
+        <li><a href="?sort_by=newest">По новизне</a></li>
+        <li><a href="?sort_by=oldest">По старизне</a></li>
+        <li><a href="?sort_by=name">По наименованию</a></li>
+        <li><a href="?sort_by=price+">Сначала дешевые</a></li>
+        <li><a href="?sort_by=price-">Сначала дорогие</a></li>
+    </ul>
+    {% if categories %}
+        <h3>Вывод всех товаров</h3>
+    	{% else %}
+        <h3>Вы выбрали категорию: {{ category.name }}</h3>
+    {% endif %}
+    <ul>
+        {% for product in products %}
+            <li class="catalog_li">
+                <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                <hr>
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}
