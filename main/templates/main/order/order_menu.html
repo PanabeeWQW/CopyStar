@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Оформленные заказы</h1>
+    <h1>Заявки на заказ</h1>
     <ul>
         {% for order_item in order_items %}
             <li>{{ order_item.product.name }} - {{ order_item.status }}</li>

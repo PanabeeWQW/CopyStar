@@ -13,8 +13,6 @@
                 {{ cart_item.product.price|floatformat:"2" }} ₽ за шт.
                 <form method="post" action="{% url 'remove_from_cart' cart_item.id %}">
                     {% csrf_token %}
-                    {% for cart_item in cart_items%}
-                        {% endfor %}
                     <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
                 </form>
             </li>

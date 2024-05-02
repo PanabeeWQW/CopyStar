@@ -11,6 +11,7 @@ urlpatterns = [
     path('remove_from_cart/<int:cart_item_id>/', remove_from_cart, name='remove_from_cart'),
     path('order/', order, name='order'),
     path('order_add/<int:product_id>/', order_add, name='order_add'),
+    path('order_detail/', order_detail, name='order_detail'),
     path('about/', about, name='about'),
     path('wherefind/', wherefind, name='wherefind'),
 ]

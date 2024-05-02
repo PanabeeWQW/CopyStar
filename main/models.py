@@ -36,10 +36,9 @@ class Product(models.Model):
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
 
-
 class Order(models.Model):
     STATUS_CHOICES = (
-        ('New', 'Новый'),
+        ('New', 'Новый(В обработке)'),
         ('Confirmed', 'Подтвержденный'),
         ('Closed', 'Закрытый')
     )
@@ -47,7 +46,7 @@ class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New', verbose_name='Статус заказа')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания заказа')
-    cancellation_reason = models.TextField(blank=True, null=True, verbose_name='Причина закрытия заказа')
+    user_message = models.TextField(blank=True, null=True, verbose_name='Сообщение для пользователя')
 
     class Meta:
         verbose_name = 'Заказ'

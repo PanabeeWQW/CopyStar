@@ -2,6 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .models import *
 
+def user_detail(request, id):
+    user_detail = User.objects.filter(id=id)
+    return(request, 'main/base.html', {'user_detail': user_detail})
+
 def index(request):
     return render(request, 'main/index.html')
 
@@ -17,8 +21,10 @@ def catalog(request):
         products = products.order_by('-production_year')
     elif sort_by == 'oldest':
         products = products.order_by('production_year')
-    elif sort_by == 'name':
+    elif sort_by == 'name+':
         products = products.order_by('name')
+    elif sort_by == 'name-':
+        products = products.order_by('-name')
     elif sort_by == 'price-':
         products = products.order_by('-price')
     elif sort_by == 'price+':
@@ -59,13 +65,16 @@ def product(request, product_id):
 
 @login_required
 def cart(request):
-    cart_items = Cart.objects.all()
+    # Фильтруем товары в корзине по текущему пользователю
+    cart_items = Cart.objects.filter(client=request.user)
     total_cost = sum(item.product.price * item.quantity for item in cart_items)
     return render(request, 'main/cart/cart.html', {'cart_items': cart_items, 'total_cost': total_cost})
+
 
 @login_required
 def add_to_cart(request, product_id):
     product = Product.objects.get(pk=product_id)
+    # Сохраняем товар в корзину с указанием текущего пользователя
     cart_item, created = Cart.objects.get_or_create(client=request.user, product=product)
     if not created:
         cart_item.quantity += 1
@@ -105,6 +114,9 @@ def order_add(request, product_id):
         # Если метод запроса не POST, возвращаем пользователя на страницу корзины
         return redirect('cart')
 
+def order_detail(request):
+    order_detail_items = Order.objects.filter(user=request.user)
+    return render(request, 'main/order/order_detail.html', {'order_detail_items': order_detail_items})
 
 def about(request):
     return render(request, 'main/about.html')

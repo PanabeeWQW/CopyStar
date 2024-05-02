@@ -6,7 +6,7 @@
 
 {% block content %}
     <h1>Каталог</h1>
-    <h3>Сортировка по категориям</h3>
+    <h3>Сортировать товары по категориям</h3>
     <ul class="product_cat">
         <li><a href="{% url 'catalog' %}">Показать все товары</a></li>
         {% for cat in categories %}
@@ -17,7 +17,8 @@
     <ul class="sort_by">
         <li><a href="?sort_by=newest">По новизне</a></li>
         <li><a href="?sort_by=oldest">По старизне</a></li>
-        <li><a href="?sort_by=name">По наименованию</a></li>
+        <li><a href="?sort_by=name">По наименованию А-Я</a></li>
+        <li><a href="?sort_by=name-">По наименованию Я-А</a></li>
         <li><a href="?sort_by=price+">Сначала дешевые</a></li>
         <li><a href="?sort_by=price-">Сначала дорогие</a></li>
     </ul>
