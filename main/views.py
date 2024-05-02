@@ -115,8 +115,8 @@ def order_add(request, product_id):
         return redirect('cart')
 
 def order_detail(request):
-    order_detail_items = Order.objects.filter(user=request.user)
-    return render(request, 'main/order/order_detail.html', {'order_detail_items': order_detail_items})
+    orders = Order.objects.filter(user=request.user)
+    return render(request, 'main/order/order_detail.html', {'orders': orders})
 
 def about(request):
     return render(request, 'main/about.html')
