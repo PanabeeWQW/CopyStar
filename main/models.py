@@ -36,6 +36,7 @@ class Product(models.Model):
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
 
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('New', 'Новый(В обработке)'),
@@ -43,29 +44,37 @@ class Order(models.Model):
         ('Closed', 'Закрытый')
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Чей заказ')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New', verbose_name='Статус заказа')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания заказа')
     user_message = models.TextField(blank=True, null=True, verbose_name='Сообщение для пользователя')
 
-    class Meta:
-        verbose_name = 'Заказ'
-        verbose_name_plural = 'Заказы'
-
     def __str__(self):
-        return f'{self.user} - {self.product.name}'
+        return f'{self.user} - {self.created_at}'
 
     def get_absolute_url(self):
         return reverse('order')
 
 
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Заказ')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Товар')
+    quantity = models.IntegerField(default=1, verbose_name='Количество')
+
+    def __str__(self):
+        return f'{self.product.name} - {self.quantity} шт.'
+
+    class Meta:
+        verbose_name = 'Товар в заказе'
+        verbose_name_plural = 'Товары в заказе'
+
+
 class Cart(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    item = models.ForeignKey(Product, on_delete=models.CASCADE)  # Изменено на item
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return f'{self.product.name} {self.client.username}'
+        return f'{self.item.name} {self.client.username}'
 
     def get_absolute_url(self):
         return reverse('cart')
