@@ -9,8 +9,8 @@
     <ul>
         {% for cart_item in cart_items %}
             <li>
-                {{ cart_item.product.name }} - {{ cart_item.quantity }} шт. -
-                {{ cart_item.product.price|floatformat:"2" }} ₽ за шт.
+                {{ cart_item.item.name }} - {{ cart_item.quantity }} шт. -
+                {{ cart_item.item.price|floatformat:"2" }} ₽ за шт.
                 <form method="post" action="{% url 'remove_from_cart' cart_item.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
@@ -22,7 +22,7 @@
     <!-- Общая стоимость всех товаров в корзине -->
     {% if cart_items %}
         <p>Общая стоимость: {{ total_cost }}₽</p>
-        <form method="post" action="{% url 'order_add' product_id=cart_items.0.product.id %}">
+        <form method="post" action="{% url 'order' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary">Оформить заказ</button>
         </form>

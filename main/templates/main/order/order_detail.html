@@ -12,8 +12,10 @@
         <p>Статус заказа: {{ order.status }}</p>
         <p>Сообщение пользователя: {{ order.user_message }}</p>
         <p>Товары в заказе:</p>
-        <ul>
-            <li>{{ order.product.name }}</li>
+        <ul class="list-group list-group-flush">
+            {% for item in order.items.all %}
+                <li class="list-group-item">{{ item.product.name }} - {{ item.quantity }} шт.</li>
+            {% endfor %}
         </ul>
         <hr>
     {% empty %}

@@ -1,10 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .models import *
-
-def user_detail(request, id):
-    user_detail = User.objects.filter(id=id)
-    return(request, 'main/base.html', {'user_detail': user_detail})
 
 def index(request):
     return render(request, 'main/index.html')
@@ -65,17 +62,19 @@ def product(request, product_id):
 
 @login_required
 def cart(request):
-    # Фильтруем товары в корзине по текущему пользователю
+    # Получаем все товары в корзине текущего пользователя
     cart_items = Cart.objects.filter(client=request.user)
-    total_cost = sum(item.product.price * item.quantity for item in cart_items)
-    return render(request, 'main/cart/cart.html', {'cart_items': cart_items, 'total_cost': total_cost})
 
+    # Вычисляем общую стоимость всех товаров в корзине
+    total_cost = sum(item.item.price * item.quantity for item in cart_items)
+
+    return render(request, 'main/cart/cart.html', {'cart_items': cart_items, 'total_cost': total_cost})
 
 @login_required
 def add_to_cart(request, product_id):
     product = Product.objects.get(pk=product_id)
     # Сохраняем товар в корзину с указанием текущего пользователя
-    cart_item, created = Cart.objects.get_or_create(client=request.user, product=product)
+    cart_item, created = Cart.objects.get_or_create(client=request.user, item=product)
     if not created:
         cart_item.quantity += 1
         cart_item.save()
@@ -85,34 +84,67 @@ def add_to_cart(request, product_id):
 def remove_from_cart(request, cart_item_id):
     cart_item = Cart.objects.get(id=cart_item_id)
     cart_item.delete()
-    return redirect(reverse('cart'))
+    return redirect('cart')
 
 @login_required
 def order(request):
-    order_items = Order.objects.filter(user=request.user)
-    return render(request, 'main/order/order_menu.html', {'order_items': order_items})
+    if request.method == 'POST':
+        # Получаем текущего пользователя
+        user = request.user
+
+        # Получаем все товары в корзине текущего пользователя
+        cart_items = Cart.objects.filter(client=user)
+
+        # Проверяем, что в корзине есть товары
+        if cart_items:
+            # Создаем новый заказ для текущего пользователя со статусом "New"
+            order = Order.objects.create(user=user, status='New')
+
+            # Добавляем товары из корзины в заказ
+            for cart_item in cart_items:
+                OrderItem.objects.create(order=order, product=cart_item.item, quantity=cart_item.quantity)
+
+            # Очищаем корзину текущего пользователя
+            cart_items.delete()
+
+            messages.success(request, 'Заказ успешно оформлен.')
+            return redirect('order_detail')
+        else:
+            messages.error(request, 'Ваша корзина пуста.')
+            return redirect('cart')
+
+    else:
+        # Если это GET-запрос, просто отображаем страницу корзины
+        cart_items = Cart.objects.filter(client=request.user)
+        total_cost = sum(item.item.price * item.quantity for item in cart_items)
+        return render(request, 'main/cart/cart.html', {'cart_items': cart_items, 'total_cost': total_cost})
 
 @login_required
 def order_add(request, product_id):
     if request.method == 'POST':
+        # Получаем текущего пользователя
+        user = request.user
+
         # Получаем товар по его идентификатору
         product = Product.objects.get(pk=product_id)
 
-        # Создаем экземпляр заказа для текущего пользователя и товара
-        order = Order.objects.create(
-            user=request.user,
-            product=product,
-            status='New'  # Изменяем на нужный вам статус
-        )
+        # Получаем или создаем заказ для текущего пользователя
+        order, created = Order.objects.get_or_create(user=user, status='New')
 
-        # Удаляем все товары из корзины для текущего пользователя
-        Cart.objects.filter(client=request.user).delete()
+        # Если товар уже есть в заказе, увеличиваем количество
+        order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
+        if not created:
+            order_item.quantity += 1
+            order_item.save()
+            messages.success(request, f'Количество товара {product.name} в заказе увеличено на 1.')
+        else:
+            messages.success(request, f'Товар {product.name} добавлен в заказ.')
 
-        # Перенаправляем пользователя на страницу заказов
-        return redirect('order')
-    else:
-        # Если метод запроса не POST, возвращаем пользователя на страницу корзины
+        # Перенаправляем пользователя на страницу корзины
         return redirect('cart')
+    else:
+        # Если метод запроса не POST, возвращаем пользователя на страницу товара
+        return redirect('product', product_id=product_id)
 
 def order_detail(request):
     orders = Order.objects.filter(user=request.user)
